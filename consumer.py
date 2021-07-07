@@ -2,15 +2,16 @@ from kafka import KafkaConsumer
 from json import loads
 from PIL import Image
 from io import BytesIO
-import datetime
 from time import sleep, time
+import datetime
 import csv
+import random
 
 
-csvfile = open('logs.csv', 'w', newline='', encoding='utf-8')
+csvfile = open('logs/logs{}.csv'.format(random. randint(0,100)), 'w', newline='', encoding='utf-8')
 c = csv.writer(csvfile)
 
-c.writerow(['frame_n', 'sent', 'received', 'processed'])
+c.writerow(['frame_n', 'sent', 'received', 'processed', 'size'])
 
 consumer = KafkaConsumer(
     'videoparts',
@@ -34,8 +35,9 @@ for message in consumer:
   sleep(1)
   stream = BytesIO(message.value)
   image = Image.open(stream).convert("RGBA")
+  size = stream.getbuffer().nbytes
   stream.close()
 
   processed = int(time() * 1000)
-  print([frame, sent, received, processed])
-  c.writerow([frame, sent, received, processed])
+  print([frame, sent, received, processed, size])
+  c.writerow([frame, sent, received, processed, size])
